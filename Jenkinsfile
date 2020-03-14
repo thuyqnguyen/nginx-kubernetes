@@ -4,6 +4,14 @@ pipeline {
         skipStagesAfterUnstable()
     }
     stages {
+        stage('Pre Flight') {
+            steps {
+                script {
+                    echo "The build number is ${env.BUILD_NUMBER}"
+                    echo "The branch name is ${env.BRANCH_NAME}"
+                }
+            }
+        }
         stage('Build Docker Image') {
             when {
                 branch 'master'
