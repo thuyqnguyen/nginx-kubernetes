@@ -13,9 +13,11 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            /*---
             when {
                 branch 'master'
             }
+            ---*/
             steps {
                 script {
                     app = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
