@@ -30,31 +30,25 @@ pipeline {
             }
         }
 
-        def test_host = [:]
-        test_host.name = "test"
-        test_host.host = "${docker_test_ip}"
-        test_host.allowAnyHosts = true
-
         stage('Deploy to test') {
             when {
                 branch 'test'
             }
-
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
-                    test_host.user = USERNAME
-                    test_host.password = USERPASS
-                    script {
-                        sshCommand remote: test_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        sshCommand remote: test_host, command: "pwd;ls"
-                        /*
-                        try {
-                            ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
-                            ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container rm my-nginx-${env.BRANCH_NAME}"
-                        } catch (err) {
-                            echo: 'caught and ignore error: $err'
-                        ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        */
+                script {
+                    stage ('ssh') {
+                        def test_host = [:]
+                        test_host.name = "test"
+                        test_host.host = "${docker_test_ip}"
+                        test_host.allowAnyHosts = true
+
+                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                            test_host.user = USERNAME
+                            test_host.password = USERPASS
+                                
+                            sshCommand remote: test_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                            sshCommand remote: test_host, command: "pwd;ls"
+                        }
                     }
                 }
             }
