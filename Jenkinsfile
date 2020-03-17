@@ -13,16 +13,32 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            /*---
             environment {
                 my_docker_hub_url = 'https://docker.io'
             }
             steps {
                 script {
                     withCredentials([usernamePassword( credentialsId: 'my_docker_hub', usernameVariable: 'my_docker_hub_user', passwordVariable: 'my_docker_hub_pass')]) {
-                        sh "docker login -u ${my_docker_hub_user} -p ${my_docker_hub_pass} ${my_docker_hub_url}"
                         nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                        sh "docker login -u ${my_docker_hub_user} -p ${my_docker_hub_pass} ${my_docker_hub_url}"
                         nginxImage.push()
                     }
+                }
+            }
+            ---*/
+            steps {
+                script {
+                    nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'my_docker_hub') {
+                    app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                        
                 }
             }
         }
