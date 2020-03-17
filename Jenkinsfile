@@ -34,15 +34,16 @@ pipeline {
             when {
                 branch 'test'
             }
+
+            def remote = [:]
+            remote.name = "test"
+            remote.host = "${docker_test_ip}"
+            remote.allowAnyHosts = true
+
             steps {
-                def remote = [:]
-                remote.name = "test"
-                remote.host = "${docker_test_ip}"
-                remote.allowAnyHosts = true
                 withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     remote.user = USERNAME
                     remote.password = USERPASS
-
                     script {
                         sshCommand remote: remote, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         sshCommand remote: remote, command: "pwd;ls"
