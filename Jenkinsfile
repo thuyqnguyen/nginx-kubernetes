@@ -47,7 +47,14 @@ pipeline {
                             test_host.password = USERPASS
                                 
                             sshCommand remote: test_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                            sshCommand remote: test_host, command: "pwd;ls"
+                            try {
+                                sshCommand remote: test_host, command: "docker container stop my-nginx-${env.BRANCH_NAME}"
+                                sshCommand remote: test_host, command: "docker container rm my-nginx-${env.BRANCH_NAME}"
+                            }
+                            catch(Exception e) {
+                                echo "catch and ignore this error: ${e}"
+                            }
+                            sshCommand remote: test_host, command: "docker container run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"                       
                         }
                     }
                 }
