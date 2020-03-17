@@ -39,6 +39,11 @@ pipeline {
                     sh '''
                         echo "deploy to ${docker_test_ip}"
                         withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                            echo ${USERNAME}
+                            echo ${USERPASS}
+                        }
+                        /*---
+                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                             ssh -o StrictHostKeyChecking=no cloud_user@${docker_test_ip} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                             try {
                                 ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERPASS}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
@@ -47,6 +52,7 @@ pipeline {
                                 echo: 'caught error: $err'
                             ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERPASS}@${docker_test_ip} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         }
+                        ---*/
                     '''  
                 }
             }
