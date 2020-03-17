@@ -20,9 +20,12 @@ pipeline {
             ---*/
             steps {
                 script {
-                    app = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
-                    app.inside {
-                        sh 'echo $(curl localhost:80)'
+                    docker.withRegistry('https://hub.docker.com') {
+                        nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                        nginxImage.inside {
+                            sh 'echo $(curl localhost:80)'
+                        }
+                        nginxImage.push('latest')
                     }
                 }
             }
