@@ -35,15 +35,25 @@ pipeline {
                 branch 'test'
             }
             steps {
+                def remote = [:]
+                remote.name = "test"
+                remote.host = "${docker_test_ip}"
+                remote.allowAnyHosts = true
                 withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    remote.user = USERNAME
+                    remote.password = USERPASS
+
                     script {
-                        ssh -o StrictHostKeyChecking=no cloud_user@${docker_test_ip} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        sshCommand remote: remote, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        sshCommand remote: remote, command: "pwd;ls"
+                        /*
                         try {
                             ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
                             ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container rm my-nginx-${env.BRANCH_NAME}"
                         } catch (err) {
                             echo: 'caught and ignore error: $err'
                         ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        */
                     }
                 }
             }
