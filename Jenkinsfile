@@ -13,51 +13,21 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-            environment {
-                my_docker_hub_url = 'https://docker.io'
-            }
             steps {
                 script {
-                    withCredentials([usernamePassword( credentialsId: 'my_docker_hub', usernameVariable: 'my_docker_hub_user', passwordVariable: 'my_docker_hub_pass')]) {
-                        sh "docker login -u ${my_docker_hub_user} -p ${my_docker_hub_pass} ${my_docker_hub_url}"
-                        nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
-                        nginxImage.push()
-                    }
+                    nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                 }
             }
         }
-        /*---
-        stage('Test') {
-            agent {
-                docker {
-                    image 'qnib/pytest'
-                }
-            }
+
+        stage('Push Docker Image') {
             steps {
-                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
-            }
-            post {
-                always {
-                    junit 'test-reports/results.xml'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'my_docker_hub') {
+                        nginxImage.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                    }    
                 }
             }
         }
-        stage('Deliver') { 
-            agent {
-                docker {
-                    image 'cdrx/pyinstaller-linux:python2' 
-                }
-            }
-            steps {
-                sh 'pyinstaller --onefile sources/add2vals.py' 
-            }
-            post {
-                success {
-                    archiveArtifacts 'dist/add2vals' 
-                }
-            }
-        }
-        ---*/
     }
 }
-
