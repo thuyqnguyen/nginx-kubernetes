@@ -30,23 +30,23 @@ pipeline {
             }
         }
 
+        def test_host = [:]
+        test_host.name = "test"
+        test_host.host = "${docker_test_ip}"
+        test_host.allowAnyHosts = true
+
         stage('Deploy to test') {
             when {
                 branch 'test'
             }
 
-            def remote = [:]
-            remote.name = "test"
-            remote.host = "${docker_test_ip}"
-            remote.allowAnyHosts = true
-
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
-                    remote.user = USERNAME
-                    remote.password = USERPASS
+                    test_host.user = USERNAME
+                    test_host.password = USERPASS
                     script {
-                        sshCommand remote: remote, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        sshCommand remote: remote, command: "pwd;ls"
+                        sshCommand remote: test_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        sshCommand remote: test_host, command: "pwd;ls"
                         /*
                         try {
                             ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
