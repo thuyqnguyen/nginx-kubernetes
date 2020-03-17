@@ -20,7 +20,7 @@ pipeline {
             ---*/
             steps {
                 script {
-                    docker.withRegistry('https://hub.docker.com') {
+                    docker.withRegistry('https://hub.docker.com', 'my_docker_hub') {
                         def nginxImage = docker.build("thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                         nginxImage.push()
                     }
