@@ -36,15 +36,27 @@ pipeline {
             }
             steps {
                 script {
-                    ssh '''
-                        ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        try {
-                            ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker container stop my-nginx-${env.BRANCH_NAME}"
-                            ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker container rm my-nginx-${env.BRANCH_NAME}"
-                        } catch (err) {
-                            echo: 'caught error: $err'
-                        ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                    '''  
+                    stage ('ssh to test') {
+                        def test_host = [:]
+                        test_host.name = "test"
+                        test_host.host = "${docker_test_ip}"
+                        test_host.allowAnyHosts = true
+
+                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                            test_host.user = USERNAME
+                            test_host.password = USERPASS
+                                
+                            sshCommand remote: test_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                            try {
+                                sshCommand remote: test_host, command: "docker container stop my-nginx-${env.BRANCH_NAME}"
+                                sshCommand remote: test_host, command: "docker container rm my-nginx-${env.BRANCH_NAME}"
+                            }
+                            catch(Exception e) {
+                                echo "catch and ignore this error: ${e}"
+                            }
+                            sshCommand remote: test_host, command: "docker container run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"                       
+                        }
+                    }
                 }
             }
         }
@@ -57,15 +69,27 @@ pipeline {
                 input 'Deploy to Production?'
                 milestone(1)
                 script {
-                    ssh '''
-                        ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        try {
-                            ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker container stop my-nginx-${env.BRANCH_NAME}"
-                            ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker container rm my-nginx-${env.BRANCH_NAME}"
-                        } catch (err) {
-                            echo: 'caught error: $err'
-                        ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                    '''  
+                    stage ('ssh to prod') {
+                        def prod_host = [:]
+                        prod_host.name = "prod"
+                        prod_host.host = "${docker_prod_ip}"
+                        prod_host.allowAnyHosts = true
+
+                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                            prod_host.user = USERNAME
+                            prod_host.password = USERPASS
+                                
+                            sshCommand remote: prod_host, command: "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                            try {
+                                sshCommand remote: prod_host, command: "docker container stop my-nginx-${env.BRANCH_NAME}"
+                                sshCommand remote: prod_host, command: "docker container rm my-nginx-${env.BRANCH_NAME}"
+                            }
+                            catch(Exception e) {
+                                echo "catch and ignore this error: ${e}"
+                            }
+                            sshCommand remote: prod_host, command: "docker container run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"                       
+                        }
+                    }
                 }
             }
         }
