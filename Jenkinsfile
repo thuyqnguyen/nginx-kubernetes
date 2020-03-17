@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'my_docker_hub') {
-                        app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                        nginxImage.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                     }    
                 }
             }
