@@ -35,25 +35,16 @@ pipeline {
                 branch 'test'
             }
             steps {
-                script {
-                    sh '''
-                        echo "deploy to ${docker_test_ip}"
-                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
-                            echo ${USERNAME}
-                            echo ${USERPASS}
-                        }
-                        /*---
-                        withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
-                            ssh -o StrictHostKeyChecking=no cloud_user@${docker_test_ip} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                            try {
-                                ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERPASS}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
-                                ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERPASS}@${docker_test_ip} "docker container rm my-nginx-${env.BRANCH_NAME}"
-                            } catch (err) {
-                                echo: 'caught error: $err'
-                            ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERPASS}@${docker_test_ip} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        }
-                        ---*/
-                    '''  
+                withCredentials([usernamePassword(credentialsId: 'docker_deploy', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    script {
+                        ssh -o StrictHostKeyChecking=no cloud_user@${docker_test_ip} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        try {
+                            ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container stop my-nginx-${env.BRANCH_NAME}"
+                            ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker container rm my-nginx-${env.BRANCH_NAME}"
+                        } catch (err) {
+                            echo: 'caught and ignore error: $err'
+                        ssh -o StrictHostKeyChecking=no -p ${USERPASS} ${USERNAME}@${docker_test_ip} "docker run -d -p 8000:80 --name my-nginx-${env.BRANCH_NAME} thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    }
                 }
             }
         }
