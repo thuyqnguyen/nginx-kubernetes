@@ -24,7 +24,7 @@ pipeline {
                     nginxImage.inside {
                         sh 'echo $(curl localhost:80)'
                     }
-                    customImage.push()
+                    nginxImage.push('latest')
                 }
             }
         }
