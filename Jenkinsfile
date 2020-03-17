@@ -37,6 +37,7 @@ pipeline {
             steps {
                 script {
                     ssh '''
+                        echo "deploy to ${test}"
                         ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         try {
                             ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker container stop my-nginx-${env.BRANCH_NAME}"
