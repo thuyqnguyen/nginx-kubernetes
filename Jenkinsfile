@@ -19,16 +19,15 @@ pipeline {
                 }
             }
         }
-        /*
+
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'my_docker_hub') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'my_docker_hub')
                     app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
                         
                 }
             }
         }
-        */
     }
 }
