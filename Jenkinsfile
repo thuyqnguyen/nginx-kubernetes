@@ -36,7 +36,7 @@ pipeline {
             }
             steps {
                 script {
-                    ssh '''
+                    sh '''
                         echo "deploy to ${test}"
                         ssh -o StrictHostKeyChecking=no cloud_user@${test} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         try {
@@ -58,7 +58,8 @@ pipeline {
                 input 'Deploy to Production?'
                 milestone(1)
                 script {
-                    ssh '''
+                    sh '''
+                        echo "deploy to ${prod}"
                         ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker image pull thuyqnguyen/my-nginx:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         try {
                             ssh -o StrictHostKeyChecking=no cloud_user@${prod} "docker container stop my-nginx-${env.BRANCH_NAME}"
