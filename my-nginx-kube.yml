@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: my-nginx-$BRANCH_NAME
-        image: my-nginx-$BRANCH_NAME:$BUILD_NUMBER
+        image: thuyqnguyen/my-nginx-$BRANCH_NAME:$BUILD_NUMBER
         ports:
         - containerPort: 80
 
